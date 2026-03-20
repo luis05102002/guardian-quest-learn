@@ -5,7 +5,7 @@ import { useProgress } from "@/hooks/useProgress";
 import { useAuth } from "@/hooks/useAuth";
 import ModuleCard from "@/components/ModuleCard";
 import ProgressBar from "@/components/ProgressBar";
-import { Shield, ChevronRight, LogOut, User } from "lucide-react";
+import { Shield, ChevronRight, LogOut, User, Trophy, Award } from "lucide-react";
 import { getTotalLessons } from "@/data/curriculum";
 
 export default function Index() {
