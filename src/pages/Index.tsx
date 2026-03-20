@@ -3,14 +3,16 @@ import { Link } from "react-router-dom";
 import { curriculum, getAllLessonsCount } from "@/data/curriculum";
 import { useProgress } from "@/hooks/useProgress";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ModuleCard from "@/components/ModuleCard";
 import ProgressBar from "@/components/ProgressBar";
-import { Shield, ChevronRight, LogOut, User, Trophy, Award } from "lucide-react";
+import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings } from "lucide-react";
 import { getTotalLessons } from "@/data/curriculum";
 
 export default function Index() {
   const { getModuleProgress, totalCompleted } = useProgress();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const totalLessons = getAllLessonsCount();
   const overallPercent = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
 
@@ -42,6 +44,15 @@ export default function Index() {
 
             {user && (
               <div className="flex items-center gap-1">
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="p-2 rounded-lg hover:bg-secondary/50 text-[hsl(var(--cyber-amber))] hover:text-foreground transition-colors active:scale-95"
+                    title="Admin"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Link>
+                )}
                 <Link
                   to="/ranking"
                   className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
