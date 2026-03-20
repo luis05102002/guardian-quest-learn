@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { curriculum } from "@/data/curriculum";
 import { useProgress } from "@/hooks/useProgress";
 import { useLessonContent } from "@/hooks/useLessonContent";
-import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Circle, Loader2, RefreshCw, BookOpen } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Circle, Loader2, RefreshCw, BookOpen, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useEffect, useRef } from "react";
 
@@ -20,15 +20,23 @@ export default function LessonPage() {
   const progressKey = module && lesson ? `m${module.id}-${lesson.id}` : "";
   const completed = isCompleted(progressKey);
 
-  // Build context for AI content generation
   const moduleTitle = module?.title || "";
   const sectionTitle = section?.title || "";
   const lessonTitle = lesson?.title || "";
   const lessonType = lesson?.type || "lesson";
 
-  const { content, loading, error, regenerate } = useLessonContent(
+  const { content, loading, error, generated, generate, regenerate, reset } = useLessonContent(
     moduleTitle, sectionTitle, lessonTitle, lessonType
   );
+
+  // Reset when lesson changes
+  const prevLessonId = useRef(lessonId);
+  useEffect(() => {
+    if (prevLessonId.current !== lessonId) {
+      reset();
+      prevLessonId.current = lessonId;
+    }
+  }, [lessonId, reset]);
 
   // Find prev/next lessons across sections
   const allLessons = module?.sections.flatMap(s =>
@@ -122,23 +130,45 @@ export default function LessonPage() {
             </h1>
           </div>
 
-          {/* AI-generated content */}
+          {/* Generate button or content */}
           <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+            {!generated && !loading && (
+              <div className="text-center py-12 space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                  <Sparkles className="w-7 h-7 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">Contenido listo para generar</p>
+                  <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                    Pulsa el botón para generar el contenido educativo de esta lección con IA.
+                  </p>
+                </div>
+                <button
+                  onClick={() => generate()}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors active:scale-[0.97]"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Generar contenido
+                </button>
+              </div>
+            )}
+
             {loading && (
               <div className="space-y-6">
                 <div className="flex items-center gap-3 text-muted-foreground">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Generando contenido educativo...</span>
                 </div>
-                {/* Skeleton */}
-                <div className="space-y-4">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="h-4 bg-secondary/60 rounded w-full animate-pulse" style={{ animationDelay: `${i * 100}ms` }} />
-                      <div className="h-4 bg-secondary/40 rounded w-3/4 animate-pulse" style={{ animationDelay: `${i * 100 + 50}ms` }} />
-                    </div>
-                  ))}
-                </div>
+                {!content && (
+                  <div className="space-y-4">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="space-y-2">
+                        <div className="h-4 bg-secondary/60 rounded w-full animate-pulse" style={{ animationDelay: `${i * 100}ms` }} />
+                        <div className="h-4 bg-secondary/40 rounded w-3/4 animate-pulse" style={{ animationDelay: `${i * 100 + 50}ms` }} />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -146,7 +176,7 @@ export default function LessonPage() {
               <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 text-center space-y-3">
                 <p className="text-sm text-destructive">{error}</p>
                 <button
-                  onClick={regenerate}
+                  onClick={() => generate()}
                   className="inline-flex items-center gap-2 text-sm text-primary hover:text-foreground transition-colors active:scale-95"
                 >
                   <RefreshCw className="w-4 h-4" />
@@ -155,7 +185,7 @@ export default function LessonPage() {
               </div>
             )}
 
-            {!loading && !error && content && (
+            {content && (
               <article className="prose-cyber">
                 <ReactMarkdown>{content}</ReactMarkdown>
               </article>
