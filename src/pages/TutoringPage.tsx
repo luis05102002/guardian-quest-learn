@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { format, addDays, startOfWeek, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { ArrowLeft, Calendar, Clock, Plus, Trash2, Loader2, CheckCircle2, XCircle, MessageSquare, Phone } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Plus, Trash2, Loader2, CheckCircle2, XCircle, Phone, Save } from "lucide-react";
 import { toast } from "sonner";
 
 interface Slot {
@@ -28,6 +28,8 @@ interface Booking {
   cancelled_at: string | null;
 }
 
+const TEACHER_WHATSAPP_KEY = "cyberacademy_teacher_whatsapp";
+
 export default function TutoringPage() {
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin();
@@ -42,11 +44,11 @@ export default function TutoringPage() {
   const [bookingNotes, setBookingNotes] = useState("");
   const [bookingPhone, setBookingPhone] = useState("");
   const [profiles, setProfiles] = useState<Record<string, string>>({});
-  const [whatsappTeacher, setWhatsappTeacher] = useState("");
+  const [whatsappTeacher, setWhatsappTeacher] = useState(() => localStorage.getItem(TEACHER_WHATSAPP_KEY) || "");
+  const [editingWhatsapp, setEditingWhatsapp] = useState(false);
+  const [tempWhatsapp, setTempWhatsapp] = useState("");
 
-  useEffect(() => {
-    fetchData();
-  }, [user]);
+  useEffect(() => { fetchData(); }, [user]);
 
   const fetchData = async () => {
     if (!user) return;
@@ -93,7 +95,6 @@ export default function TutoringPage() {
     } as any);
     if (error) { toast.error("Error al reservar"); return; }
     await supabase.from("tutoring_slots").update({ is_available: false } as any).eq("id", slotId);
-    // Create notification for teacher
     const slot = slots.find(s => s.id === slotId);
     if (slot) {
       await supabase.from("notifications").insert({
@@ -111,20 +112,26 @@ export default function TutoringPage() {
   };
 
   const cancelBooking = async (bookingId: string, slotId: string) => {
-    await supabase.from("tutoring_bookings").update({ 
-      status: "cancelled", 
-      cancelled_at: new Date().toISOString() 
+    await supabase.from("tutoring_bookings").update({
+      status: "cancelled",
+      cancelled_at: new Date().toISOString(),
     } as any).eq("id", bookingId);
     await supabase.from("tutoring_slots").update({ is_available: true } as any).eq("id", slotId);
     toast.success("Tutoría cancelada");
     fetchData();
   };
 
-  // Generate week days
+  const saveWhatsapp = () => {
+    localStorage.setItem(TEACHER_WHATSAPP_KEY, tempWhatsapp);
+    setWhatsappTeacher(tempWhatsapp);
+    setEditingWhatsapp(false);
+    toast.success("Número de WhatsApp guardado");
+  };
+
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
-  const slotsForDate = (date: Date) => 
+  const slotsForDate = (date: Date) =>
     slots.filter(s => s.slot_date === format(date, "yyyy-MM-dd"));
 
   const getBookingForSlot = (slotId: string) =>
@@ -152,18 +159,53 @@ export default function TutoringPage() {
             <span className="text-sm font-semibold text-foreground">Tutorías</span>
           </div>
           {isAdmin && (
-            <button onClick={() => setShowAddSlot(!showAddSlot)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors active:scale-95">
-              <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Añadir horario</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => { setTempWhatsapp(whatsappTeacher); setEditingWhatsapp(!editingWhatsapp); }}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-[hsl(142,70%,45%)]/10 text-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,45%)]/20 transition-colors active:scale-95"
+                title="Configurar WhatsApp">
+                <Phone className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">WhatsApp</span>
+              </button>
+              <button onClick={() => setShowAddSlot(!showAddSlot)}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors active:scale-95">
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Horario</span>
+              </button>
+            </div>
           )}
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        {/* Add slot form (admin) */}
+        {/* WhatsApp config (admin) */}
+        {editingWhatsapp && isAdmin && (
+          <div className="bg-card rounded-xl card-glow p-5 space-y-3 animate-fade-in">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Phone className="w-4 h-4 text-[hsl(142,70%,45%)]" />
+              Número de WhatsApp del profesor
+            </h3>
+            <p className="text-xs text-muted-foreground">Los alumnos podrán contactarte directamente. Usa formato internacional (ej: 34612345678)</p>
+            <div className="flex gap-2">
+              <input type="tel" value={tempWhatsapp} onChange={e => setTempWhatsapp(e.target.value)}
+                placeholder="34612345678" maxLength={20}
+                className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none font-mono-cyber" />
+              <button onClick={saveWhatsapp}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[hsl(142,70%,45%)] text-white text-xs font-medium hover:bg-[hsl(142,70%,40%)] transition-colors active:scale-95">
+                <Save className="w-3.5 h-3.5" />
+                Guardar
+              </button>
+            </div>
+            {whatsappTeacher && (
+              <p className="text-xs text-muted-foreground">
+                Número actual: <span className="font-mono-cyber text-foreground">{whatsappTeacher}</span>
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Add slot form */}
         {showAddSlot && isAdmin && (
-          <div className="bg-card rounded-xl card-glow p-5 space-y-4 animate-fade-in-up">
+          <div className="bg-card rounded-xl card-glow p-5 space-y-4 animate-fade-in">
             <h3 className="text-sm font-semibold text-foreground">Nuevo horario disponible</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
@@ -227,13 +269,18 @@ export default function TutoringPage() {
                     const isMyBooking = booking?.student_id === user?.id;
                     return (
                       <div key={slot.id} className={`text-[10px] rounded-lg p-1.5 ${
-                        booking ? (isMyBooking ? 'bg-primary/20 text-primary' : 'bg-destructive/10 text-muted-foreground') 
+                        booking ? (isMyBooking ? 'bg-primary/20 text-primary' : 'bg-destructive/10 text-muted-foreground')
                                : 'bg-primary/10 text-primary cursor-pointer hover:bg-primary/20'
                       } transition-colors`}>
                         <div className="flex items-center gap-1">
                           <Clock className="w-2.5 h-2.5 shrink-0" />
                           <span className="font-mono-cyber">{slot.start_time.slice(0,5)}</span>
                         </div>
+                        {isAdmin && !booking && (
+                          <button onClick={() => deleteSlot(slot.id)} className="text-destructive hover:text-foreground mt-0.5">
+                            <Trash2 className="w-2.5 h-2.5" />
+                          </button>
+                        )}
                         {booking ? (
                           <span className="text-[9px] block mt-0.5 truncate">
                             {isMyBooking ? "Tu tutoría" : profiles[booking.student_id] || "Reservado"}
@@ -250,7 +297,7 @@ export default function TutoringPage() {
           })}
         </div>
 
-        {/* Available slots list (for students) */}
+        {/* Available slots (students) */}
         {!isAdmin && (
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -279,8 +326,8 @@ export default function TutoringPage() {
                         placeholder="Tema o duda (opcional)" maxLength={200}
                         className="w-full bg-secondary border border-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none" />
                       <input type="tel" value={bookingPhone} onChange={e => setBookingPhone(e.target.value)}
-                        placeholder="Tu WhatsApp (opcional)" maxLength={20}
-                        className="w-full bg-secondary border border-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none" />
+                        placeholder="Tu WhatsApp (ej: 34612345678)" maxLength={20}
+                        className="w-full bg-secondary border border-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none font-mono-cyber" />
                     </div>
                     <button onClick={() => bookSlot(slot.id)}
                       className="w-full py-2 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors active:scale-95">
@@ -316,14 +363,14 @@ export default function TutoringPage() {
                       {b.notes && <p className="text-xs text-muted-foreground mt-1">📝 {b.notes}</p>}
                     </div>
                     <div className="flex items-center gap-2">
-                      {slot && (
+                      {whatsappTeacher && (
                         <a
-                          href={`https://wa.me/${whatsappTeacher || ""}?text=${encodeURIComponent(`Hola, tengo una tutoría reservada para el ${format(new Date(slot.slot_date), "d/MM/yyyy")} a las ${slot.start_time.slice(0,5)}`)}`}
+                          href={`https://wa.me/${whatsappTeacher}?text=${encodeURIComponent(`Hola, tengo una tutoría reservada para el ${format(new Date(slot.slot_date), "d/MM/yyyy")} a las ${slot.start_time.slice(0,5)}. ${b.notes ? `Tema: ${b.notes}` : ""}`)}`}
                           target="_blank" rel="noopener noreferrer"
-                          className="p-2 rounded-lg bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors active:scale-95"
-                          title="Contactar por WhatsApp"
+                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-[hsl(142,70%,45%)]/10 text-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,45%)]/20 transition-colors active:scale-95"
                         >
-                          <Phone className="w-4 h-4" />
+                          <Phone className="w-3.5 h-3.5" />
+                          WhatsApp
                         </a>
                       )}
                       <button onClick={() => cancelBooking(b.id, b.slot_id)}
@@ -339,11 +386,11 @@ export default function TutoringPage() {
           </div>
         )}
 
-        {/* Admin: all bookings */}
+        {/* Admin: bookings */}
         {isAdmin && bookings.filter(b => b.status === "confirmed").length > 0 && (
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-primary" />
+              <Calendar className="w-4 h-4 text-primary" />
               Reservas de alumnos
             </h3>
             <div className="space-y-3">
@@ -365,16 +412,16 @@ export default function TutoringPage() {
                           <a
                             href={`https://wa.me/${b.whatsapp_phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${profiles[b.student_id] || ""}, sobre tu tutoría del ${format(new Date(slot.slot_date), "d/MM/yyyy")}...`)}`}
                             target="_blank" rel="noopener noreferrer"
-                            className="p-2 rounded-lg bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors active:scale-95"
-                            title="Contactar por WhatsApp"
+                            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-[hsl(142,70%,45%)]/10 text-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,45%)]/20 transition-colors active:scale-95"
                           >
-                            <Phone className="w-4 h-4" />
+                            <Phone className="w-3.5 h-3.5" />
+                            WhatsApp
                           </a>
                         )}
-                        <button onClick={() => deleteSlot(slot.id)}
-                          className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors active:scale-95"
-                          title="Eliminar horario">
-                          <Trash2 className="w-3.5 h-3.5" />
+                        <button onClick={() => cancelBooking(b.id, b.slot_id)}
+                          className="flex items-center gap-1.5 text-xs text-destructive px-3 py-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 transition-colors active:scale-95">
+                          <XCircle className="w-3.5 h-3.5" />
+                          Cancelar
                         </button>
                       </div>
                     </div>

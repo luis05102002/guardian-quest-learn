@@ -16,6 +16,7 @@ import AdminPage from "./pages/AdminPage.tsx";
 import AdminProjectsPage from "./pages/AdminProjectsPage.tsx";
 import TutoringPage from "./pages/TutoringPage.tsx";
 import ChatPage from "./pages/ChatPage.tsx";
+import ToolsPage from "./pages/ToolsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import CyberChatbot from "./components/CyberChatbot.tsx";
 import { Loader2 } from "lucide-react";
@@ -53,6 +54,7 @@ const AppRoutes = () => {
         <Route path="/admin/proyectos" element={<ProtectedRoute><AdminProjectsPage /></ProtectedRoute>} />
         <Route path="/tutorias" element={<ProtectedRoute><TutoringPage /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+        <Route path="/herramientas" element={<ProtectedRoute><ToolsPage /></ProtectedRoute>} />
         <Route path="/modulo/:id" element={<ProtectedRoute><ModulePage /></ProtectedRoute>} />
         <Route path="/modulo/:moduleId/seccion/:sectionId/leccion/:lessonId" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
