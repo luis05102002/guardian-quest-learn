@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 const CACHE_PREFIX = "lesson-content-";
 
@@ -67,15 +66,24 @@ Requisitos del contenido:
 - Si aplica, incluye una sección "Para profundizar" con temas relacionados a investigar`;
 
     try {
-      const response = await supabase.functions.invoke("cyber-chat", {
-        body: {
-          messages: [{ role: "user", content: prompt }],
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/cyber-chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseKey}`,
+          "apikey": supabaseKey,
         },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: prompt }],
+        }),
       });
 
-      if (response.error) throw new Error(response.error.message);
+      if (!response.ok) throw new Error("Error al generar contenido");
 
-      const reader = (response.data as ReadableStream).getReader();
+      const reader = response.body!.getReader();
       const decoder = new TextDecoder();
       let fullContent = "";
 
