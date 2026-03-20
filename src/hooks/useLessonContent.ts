@@ -48,22 +48,24 @@ export function useLessonContent(
       ? "Esta es una sección de FEEDBACK. Haz un breve resumen de lo aprendido en esta sección, destaca los puntos clave y anima al estudiante a continuar."
       : "Esta es una lección teórica. Explica el tema de forma clara, completa y didáctica.";
 
-    const prompt = `Genera contenido educativo completo y profesional para la siguiente lección de un curso de ciberseguridad:
+    const prompt = `Eres un profesor experto en ciberseguridad creando material educativo. Genera contenido ESPECÍFICO y ÚNICO para esta lección concreta:
 
-**Módulo:** ${moduleTitle}
-**Sección:** ${sectionTitle}
-**Lección:** ${lessonTitle}
+**Módulo ${moduleTitle}**
+**Sección: ${sectionTitle}**
+**Tema exacto: ${lessonTitle}**
 
 ${typeInstruction}
 
-Requisitos del contenido:
+INSTRUCCIONES CRÍTICAS:
+- El contenido debe ser 100% específico sobre "${lessonTitle}". NO hables de otros temas del módulo
 - Escribe en español profesional
-- Usa formato Markdown con encabezados (##, ###), listas, negritas, bloques de código cuando aplique
-- Incluye ejemplos prácticos y del mundo real
-- Si es relevante, menciona herramientas, estándares o frameworks reales
-- Extensión: entre 800 y 1500 palabras
-- Incluye una sección de "Puntos clave" al final con un resumen
-- Si aplica, incluye una sección "Para profundizar" con temas relacionados a investigar`;
+- Usa Markdown: ## para títulos, ### subtítulos, listas, **negritas**, \`código\` cuando aplique
+- Incluye datos reales: nombres de herramientas reales, CVEs reales, estándares con números específicos, ejemplos de empresas/incidentes reales cuando sea relevante
+- Si el tema es técnico, incluye comandos, configuraciones o código real y funcional
+- Si el tema es normativo, cita artículos o cláusulas específicas
+- Extensión: 1000-2000 palabras. Sé profundo, no superficial
+- Estructura: Introducción → Desarrollo con subsecciones → Ejemplos prácticos → Puntos clave → Para profundizar
+- NO repitas información genérica sobre ciberseguridad. Ve directo al tema específico de la lección`;
 
     try {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
