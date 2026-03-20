@@ -69,6 +69,13 @@ export default function Index() {
                   <MessageSquare className="w-4 h-4" />
                 </Link>
                 <Link
+                  to="/herramientas"
+                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                  title="Herramientas"
+                >
+                  <Wrench className="w-4 h-4" />
+                </Link>
+                <Link
                   to="/ranking"
                   className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
                   title="Ranking"
