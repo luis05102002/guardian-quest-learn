@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage.tsx";
 import RankingPage from "./pages/RankingPage.tsx";
 import CertificatesPage from "./pages/CertificatesPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
+import AdminProjectsPage from "./pages/AdminProjectsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import CyberChatbot from "./components/CyberChatbot.tsx";
 import { Loader2 } from "lucide-react";
