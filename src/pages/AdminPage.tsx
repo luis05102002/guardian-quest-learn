@@ -275,6 +275,63 @@ export default function AdminPage() {
           </Link>
         </div>
 
+        {/* Doubt patterns */}
+        {doubtPatterns.length > 0 && (
+          <div className="grid sm:grid-cols-2 gap-4 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+            <div className="bg-card rounded-xl card-glow p-5">
+              <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[hsl(var(--cyber-amber))]" />
+                Temas con más dudas
+              </h3>
+              <div className="space-y-2">
+                {doubtPatterns.map(p => (
+                  <div key={p.topic} className="flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-foreground capitalize truncate">{p.topic}</span>
+                        <span className="font-mono-cyber text-[10px] text-muted-foreground tabular-nums">{p.count} dudas</span>
+                      </div>
+                      <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-[hsl(var(--cyber-amber))] transition-all"
+                          style={{ width: `${Math.min(100, (p.count / (doubtPatterns[0]?.count || 1)) * 100)}%` }}
+                        />
+                      </div>
+                      <p className="text-[9px] text-muted-foreground mt-0.5 truncate">
+                        {p.students.slice(0, 3).join(", ")}{p.students.length > 3 ? ` +${p.students.length - 3}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-card rounded-xl card-glow p-5">
+              <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-primary" />
+                Dudas recientes
+              </h3>
+              <div className="space-y-2 max-h-[280px] overflow-y-auto">
+                {recentDoubts.map((d, i) => (
+                  <div key={i} className="bg-secondary/30 rounded-lg p-2.5">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-medium text-foreground">{d.student}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium capitalize">{d.topic}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground line-clamp-2">{d.question}</p>
+                    <p className="text-[9px] text-muted-foreground/60 font-mono-cyber mt-1">
+                      {format(new Date(d.created_at), "d MMM HH:mm", { locale: es })}
+                    </p>
+                  </div>
+                ))}
+                {recentDoubts.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-4">No hay dudas registradas</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Search */}
         <div className="relative animate-fade-in-up" style={{ animationDelay: '150ms' }}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
