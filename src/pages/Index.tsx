@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { curriculum, getAllLessonsCount } from "@/data/curriculum";
+import { curriculum, getAllLessonsCount, getTotalLessons } from "@/data/curriculum";
 import { useProgress } from "@/hooks/useProgress";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ModuleCard from "@/components/ModuleCard";
 import ProgressBar from "@/components/ProgressBar";
-import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings } from "lucide-react";
-import { getTotalLessons } from "@/data/curriculum";
+import NotificationBell from "@/components/NotificationBell";
+import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings, Calendar, MessageSquare } from "lucide-react";
 
 export default function Index() {
   const { getModuleProgress, totalCompleted } = useProgress();
@@ -44,6 +44,7 @@ export default function Index() {
 
             {user && (
               <div className="flex items-center gap-1">
+                <NotificationBell />
                 {isAdmin && (
                   <Link
                     to="/admin"
@@ -53,6 +54,20 @@ export default function Index() {
                     <Settings className="w-4 h-4" />
                   </Link>
                 )}
+                <Link
+                  to="/tutorias"
+                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                  title="Tutorías"
+                >
+                  <Calendar className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/chat"
+                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                  title="Mensajes"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                </Link>
                 <Link
                   to="/ranking"
                   className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
