@@ -16,6 +16,7 @@ import AdminPage from "./pages/AdminPage.tsx";
 import AdminProjectsPage from "./pages/AdminProjectsPage.tsx";
 import TutoringPage from "./pages/TutoringPage.tsx";
 import ChatPage from "./pages/ChatPage.tsx";
+import ToolsPage from "./pages/ToolsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import CyberChatbot from "./components/CyberChatbot.tsx";
 import { Loader2 } from "lucide-react";
