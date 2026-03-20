@@ -114,7 +114,7 @@ INSTRUCCIONES CRÍTICAS:
 
       // Cache the result
       try {
-        localStorage.setItem(getCacheKey(moduleTitle, lessonTitle), fullContent);
+        localStorage.setItem(getCacheKey(moduleTitle, sectionTitle, lessonTitle), fullContent);
       } catch { /* storage full, ignore */ }
 
       setLoading(false);
