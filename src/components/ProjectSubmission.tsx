@@ -12,6 +12,8 @@ interface ProjectSubmissionProps {
 
 export default function ProjectSubmission({ moduleId, moduleTitle }: ProjectSubmissionProps) {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
+  const isTeacher = isAdmin; // admins act as teachers
   const [githubUrl, setGithubUrl] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
