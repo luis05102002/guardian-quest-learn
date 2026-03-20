@@ -1,16 +1,20 @@
 import { useParams, Link } from "react-router-dom";
 import { curriculum, getTotalLessons } from "@/data/curriculum";
 import { useProgress } from "@/hooks/useProgress";
+import { useAuth } from "@/hooks/useAuth";
 import { iconMap } from "@/lib/icons";
 import ProgressBar from "@/components/ProgressBar";
 import LessonItem from "@/components/LessonItem";
-import { ArrowLeft, ChevronDown, ChevronRight } from "lucide-react";
+import ModuleQuiz from "@/components/ModuleQuiz";
+import ProjectSubmission from "@/components/ProjectSubmission";
+import { ArrowLeft, ChevronRight, LogOut } from "lucide-react";
 import { useState } from "react";
 
 export default function ModulePage() {
   const { id } = useParams();
   const module = curriculum.find(m => m.id === Number(id));
   const { toggle, isCompleted, getModuleProgress } = useProgress();
+  const { signOut } = useAuth();
   const [openSections, setOpenSections] = useState<Set<string>>(() => new Set(module?.sections.map(s => s.id) || []));
 
   if (!module) {
@@ -86,7 +90,7 @@ export default function ModulePage() {
       </section>
 
       {/* Sections */}
-      <section className="px-4 sm:px-6 pb-12">
+      <section className="px-4 sm:px-6 pb-8">
         <div className="max-w-4xl mx-auto space-y-4">
           {module.sections.map((section, sIdx) => {
             const isOpen = openSections.has(section.id);
@@ -129,6 +133,21 @@ export default function ModulePage() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* Quiz & Project */}
+      <section className="px-4 sm:px-6 pb-8">
+        <div className="max-w-4xl mx-auto grid gap-4 sm:grid-cols-2">
+          <ModuleQuiz
+            moduleId={module.id}
+            moduleTitle={module.title}
+            sectionTitles={module.sections.map(s => s.title)}
+          />
+          <ProjectSubmission
+            moduleId={module.id}
+            moduleTitle={module.title}
+          />
         </div>
       </section>
 

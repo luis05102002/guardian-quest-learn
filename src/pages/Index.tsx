@@ -2,17 +2,18 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { curriculum, getAllLessonsCount } from "@/data/curriculum";
 import { useProgress } from "@/hooks/useProgress";
+import { useAuth } from "@/hooks/useAuth";
 import ModuleCard from "@/components/ModuleCard";
 import ProgressBar from "@/components/ProgressBar";
-import { Shield, ChevronRight } from "lucide-react";
+import { Shield, ChevronRight, LogOut, User } from "lucide-react";
 import { getTotalLessons } from "@/data/curriculum";
 
 export default function Index() {
   const { getModuleProgress, totalCompleted } = useProgress();
+  const { user, signOut } = useAuth();
   const totalLessons = getAllLessonsCount();
   const overallPercent = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
 
-  // Simple scroll reveal
   const [visible, setVisible] = useState(false);
   useEffect(() => { setVisible(true); }, []);
 
@@ -28,14 +29,31 @@ export default function Index() {
             <span className="font-semibold text-foreground tracking-tight">CyberAcademy</span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-3">
-            <span className="text-xs text-muted-foreground font-mono-cyber tabular-nums">
-              {totalCompleted}/{totalLessons}
-            </span>
-            <div className="w-24">
-              <ProgressBar percent={overallPercent} size="sm" />
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-3">
+              <span className="text-xs text-muted-foreground font-mono-cyber tabular-nums">
+                {totalCompleted}/{totalLessons}
+              </span>
+              <div className="w-24">
+                <ProgressBar percent={overallPercent} size="sm" />
+              </div>
+              <span className="font-mono-cyber text-xs text-primary tabular-nums">{overallPercent}%</span>
             </div>
-            <span className="font-mono-cyber text-xs text-primary tabular-nums">{overallPercent}%</span>
+
+            {user && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[120px]">
+                  {user.user_metadata?.full_name || user.email}
+                </span>
+                <button
+                  onClick={signOut}
+                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                  title="Cerrar sesión"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
