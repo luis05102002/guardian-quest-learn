@@ -41,10 +41,28 @@ export default function Index() {
             </div>
 
             {user && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[120px]">
-                  {user.user_metadata?.full_name || user.email}
-                </span>
+              <div className="flex items-center gap-1">
+                <Link
+                  to="/ranking"
+                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                  title="Ranking"
+                >
+                  <Trophy className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/certificados"
+                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                  title="Certificados"
+                >
+                  <Award className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/perfil"
+                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                  title="Mi perfil"
+                >
+                  <User className="w-4 h-4" />
+                </Link>
                 <button
                   onClick={signOut}
                   className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
