@@ -117,6 +117,7 @@ export default function ModulePage() {
                           key={lesson.id}
                           lesson={lesson}
                           moduleId={module.id}
+                          sectionId={section.id}
                           completed={isCompleted(`m${module.id}-${lesson.id}`)}
                           onToggle={() => toggle(`m${module.id}-${lesson.id}`)}
                           index={lIdx}
