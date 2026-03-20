@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import ModulePage from "./pages/ModulePage.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import CyberChatbot from "./components/CyberChatbot.tsx";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      <CyberChatbot />
     </TooltipProvider>
   </QueryClientProvider>
 );
