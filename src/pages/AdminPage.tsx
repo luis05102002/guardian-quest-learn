@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { curriculum, getTotalLessons } from "@/data/curriculum";
-import { ArrowLeft, Users, BookOpen, Award, BarChart3, Loader2, User, Search, ChevronDown, ChevronUp, Github, Calendar, MessageSquare, TrendingUp } from "lucide-react";
+import { ArrowLeft, Users, BookOpen, Award, BarChart3, Loader2, User, Search, ChevronDown, ChevronUp, Github, Calendar, MessageSquare, TrendingUp, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -33,16 +33,19 @@ export default function AdminPage() {
   const [studentModules, setStudentModules] = useState<Record<string, { moduleId: number; lessons: number; total: number; quizScore: number | null }[]>>({});
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [moduleChartData, setModuleChartData] = useState<{ name: string; completados: number }[]>([]);
+  const [doubtPatterns, setDoubtPatterns] = useState<{ topic: string; count: number; students: string[] }[]>([]);
+  const [recentDoubts, setRecentDoubtsData] = useState<{ question: string; student: string; topic: string; created_at: string }[]>([]);
 
   useEffect(() => {
     if (!isAdmin) return;
 
     const fetchAll = async () => {
-      const [profilesRes, progressRes, quizRes, bookingsRes] = await Promise.all([
+      const [profilesRes, progressRes, quizRes, bookingsRes, doubtsRes] = await Promise.all([
         supabase.from("profiles").select("id, full_name, avatar_url, created_at"),
         supabase.from("user_progress").select("user_id, lesson_key"),
         supabase.from("quiz_results").select("user_id, module_id, score, total"),
         supabase.from("tutoring_bookings").select("*").eq("status", "confirmed").order("created_at", { ascending: false }).limit(5),
+        supabase.from("student_doubts").select("*").order("created_at", { ascending: false }).limit(100),
       ]);
 
       const profiles = profilesRes.data || [];
@@ -82,6 +85,34 @@ export default function AdminPage() {
 
       setStudents(studentList);
       setRecentBookings(bookingsRes.data || []);
+
+      // Process doubt patterns
+      const doubts = (doubtsRes.data || []) as any[];
+      const topicMap: Record<string, { count: number; students: Set<string> }> = {};
+      doubts.forEach((d: any) => {
+        if (!topicMap[d.topic]) topicMap[d.topic] = { count: 0, students: new Set() };
+        topicMap[d.topic].count++;
+        topicMap[d.topic].students.add(d.user_id);
+      });
+      const patterns = Object.entries(topicMap)
+        .map(([topic, data]) => ({
+          topic,
+          count: data.count,
+          students: Array.from(data.students).map(sid => profiles.find(p => p.id === sid)?.full_name || "Alumno"),
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8);
+      setDoubtPatterns(patterns);
+
+      // Recent doubts with student names
+      const recent = doubts.slice(0, 10).map((d: any) => ({
+        question: d.question,
+        student: profiles.find(p => p.id === d.user_id)?.full_name || "Alumno",
+        topic: d.topic,
+        created_at: d.created_at,
+      }));
+      setRecentDoubtsData(recent);
+
       setLoading(false);
     };
 
@@ -243,6 +274,63 @@ export default function AdminPage() {
             </div>
           </Link>
         </div>
+
+        {/* Doubt patterns */}
+        {doubtPatterns.length > 0 && (
+          <div className="grid sm:grid-cols-2 gap-4 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+            <div className="bg-card rounded-xl card-glow p-5">
+              <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[hsl(var(--cyber-amber))]" />
+                Temas con más dudas
+              </h3>
+              <div className="space-y-2">
+                {doubtPatterns.map(p => (
+                  <div key={p.topic} className="flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-foreground capitalize truncate">{p.topic}</span>
+                        <span className="font-mono-cyber text-[10px] text-muted-foreground tabular-nums">{p.count} dudas</span>
+                      </div>
+                      <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-[hsl(var(--cyber-amber))] transition-all"
+                          style={{ width: `${Math.min(100, (p.count / (doubtPatterns[0]?.count || 1)) * 100)}%` }}
+                        />
+                      </div>
+                      <p className="text-[9px] text-muted-foreground mt-0.5 truncate">
+                        {p.students.slice(0, 3).join(", ")}{p.students.length > 3 ? ` +${p.students.length - 3}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-card rounded-xl card-glow p-5">
+              <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-primary" />
+                Dudas recientes
+              </h3>
+              <div className="space-y-2 max-h-[280px] overflow-y-auto">
+                {recentDoubts.map((d, i) => (
+                  <div key={i} className="bg-secondary/30 rounded-lg p-2.5">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-medium text-foreground">{d.student}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium capitalize">{d.topic}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground line-clamp-2">{d.question}</p>
+                    <p className="text-[9px] text-muted-foreground/60 font-mono-cyber mt-1">
+                      {format(new Date(d.created_at), "d MMM HH:mm", { locale: es })}
+                    </p>
+                  </div>
+                ))}
+                {recentDoubts.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-4">No hay dudas registradas</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Search */}
         <div className="relative animate-fade-in-up" style={{ animationDelay: '150ms' }}>

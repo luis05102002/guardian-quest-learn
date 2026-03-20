@@ -196,6 +196,33 @@ export type Database = {
         }
         Relationships: []
       }
+      student_doubts: {
+        Row: {
+          created_at: string
+          id: string
+          module_context: string | null
+          question: string
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          module_context?: string | null
+          question: string
+          topic?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          module_context?: string | null
+          question?: string
+          topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tutoring_bookings: {
         Row: {
           cancelled_at: string | null
