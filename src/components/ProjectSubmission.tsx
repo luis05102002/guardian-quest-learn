@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Github, Loader2, CheckCircle2, ExternalLink, Edit3 } from "lucide-react";
+import ProjectFeedback from "./ProjectFeedback";
 
 interface ProjectSubmissionProps {
   moduleId: number;
@@ -10,19 +12,21 @@ interface ProjectSubmissionProps {
 
 export default function ProjectSubmission({ moduleId, moduleTitle }: ProjectSubmissionProps) {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
+  const isTeacher = isAdmin; // admins act as teachers
   const [githubUrl, setGithubUrl] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
-  const [existing, setExisting] = useState<{ github_url: string; description: string } | null>(null);
+  const [existing, setExisting] = useState<{ github_url: string; description: string; id?: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("project_submissions")
-      .select("github_url, description")
+      .select("id, github_url, description")
       .eq("user_id", user.id)
       .eq("module_id", moduleId)
       .maybeSingle()
@@ -105,6 +109,7 @@ export default function ProjectSubmission({ moduleId, moduleTitle }: ProjectSubm
             <CheckCircle2 className="w-3 h-3" /> Guardado
           </p>
         )}
+        {existing.id && <ProjectFeedback submissionId={existing.id} isTeacher={isTeacher} />}
       </div>
     );
   }

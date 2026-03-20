@@ -38,6 +38,44 @@ export type Database = {
         }
         Relationships: []
       }
+      project_feedback: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          rating: number | null
+          submission_id: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string
+          created_at?: string
+          id?: string
+          rating?: number | null
+          submission_id: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          rating?: number | null
+          submission_id?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_feedback_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "project_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_submissions: {
         Row: {
           description: string | null

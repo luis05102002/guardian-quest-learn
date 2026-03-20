@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { curriculum, getTotalLessons } from "@/data/curriculum";
-import { ArrowLeft, Users, BookOpen, Award, BarChart3, Loader2, User, Search, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Users, BookOpen, Award, BarChart3, Loader2, User, Search, ChevronDown, ChevronUp, Github } from "lucide-react";
 
 interface StudentData {
   id: string;
@@ -156,6 +156,22 @@ export default function AdminPage() {
               <div className="text-[10px] text-muted-foreground mt-1">{stat.label}</div>
             </div>
           ))}
+        </div>
+
+        {/* Quick actions */}
+        <div className="animate-fade-in-up" style={{ animationDelay: '50ms' }}>
+          <Link
+            to="/admin/proyectos"
+            className="flex items-center gap-3 bg-card rounded-xl card-glow p-4 hover:bg-secondary/30 transition-colors active:scale-[0.995]"
+          >
+            <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
+              <Github className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">Revisar proyectos</p>
+              <p className="text-[10px] text-muted-foreground">Ver y dar feedback a los proyectos de los alumnos</p>
+            </div>
+          </Link>
         </div>
 
         {/* Search */}
