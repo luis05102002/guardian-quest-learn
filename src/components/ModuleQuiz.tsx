@@ -110,11 +110,33 @@ Responde SOLO el JSON array, nada más.`;
         }
       }
 
-      // Extract JSON from response
-      const jsonMatch = fullContent.match(/\[[\s\S]*\]/);
+      // Extract JSON from response - strip markdown code blocks first
+      let cleaned = fullContent
+        .replace(/```json\s*/gi, '')
+        .replace(/```\s*/g, '')
+        .trim();
+
+      // Find the JSON array
+      const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
       if (!jsonMatch) throw new Error("No se pudo parsear el quiz");
 
-      const parsed = JSON.parse(jsonMatch[0]) as QuizQuestion[];
+      // Try to fix common JSON issues: trailing commas, unescaped quotes in strings
+      let jsonStr = jsonMatch[0]
+        .replace(/,\s*]/g, ']')  // trailing commas
+        .replace(/,\s*}/g, '}'); // trailing commas in objects
+
+      let parsed: QuizQuestion[];
+      try {
+        parsed = JSON.parse(jsonStr) as QuizQuestion[];
+      } catch {
+        // Last resort: try to extract individual objects
+        const objectMatches = jsonStr.match(/\{[^{}]*\}/g);
+        if (!objectMatches || objectMatches.length === 0) throw new Error("No se pudo parsear el quiz");
+        parsed = objectMatches.map(obj => {
+          try { return JSON.parse(obj); } catch { return null; }
+        }).filter(Boolean) as QuizQuestion[];
+      }
+
       if (!Array.isArray(parsed) || parsed.length === 0) throw new Error("Quiz vacío");
 
       setQuestions(parsed.slice(0, 10));

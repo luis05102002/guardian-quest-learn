@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 
 const CACHE_PREFIX = "lesson-content-";
 
@@ -14,17 +14,16 @@ export function useLessonContent(
   lessonType: string
 ) {
   const [content, setContent] = useState<string>("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Track the current request to prevent stale updates
+  const [generated, setGenerated] = useState(false);
+
   const requestIdRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const fetchContent = useCallback(async (skipCache = false) => {
+  const generate = useCallback(async (skipCache = false) => {
     if (!lessonTitle) return;
 
-    // Cancel any in-flight request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -35,7 +34,6 @@ export function useLessonContent(
 
     const cacheKey = getCacheKey(moduleTitle, sectionTitle, lessonTitle);
 
-    // Check cache first
     if (!skipCache) {
       try {
         const cached = localStorage.getItem(cacheKey);
@@ -43,22 +41,23 @@ export function useLessonContent(
           setContent(cached);
           setLoading(false);
           setError(null);
+          setGenerated(true);
           return;
         }
       } catch { /* ignore */ }
     }
 
-    // Reset state immediately for new lesson
     setLoading(true);
     setError(null);
     setContent("");
+    setGenerated(true);
 
     const typeInstruction = lessonType === "demo"
       ? "Esta es una lección tipo DEMO. Incluye pasos prácticos detallados, comandos ejecutables, capturas de pantalla descritas y ejemplos que el alumno pueda replicar."
       : lessonType === "case"
       ? "Este es un CASO PRÁCTICO. Plantea un escenario realista, guía al alumno paso a paso para resolverlo, incluye preguntas de reflexión y la solución detallada."
       : lessonType === "evaluation"
-      ? "Esta es una EVALUACIÓN. Genera 8-10 preguntas de opción múltiple sobre los temas de esta sección. Para cada pregunta incluye 4 opciones (A, B, C, D), indica claramente la respuesta correcta y una breve explicación. Formatea cada pregunta así:\n\n### Pregunta N\n\n**Enunciado de la pregunta**\n\nA) Opción A\nB) Opción B\nC) Opción C\nD) Opción D\n\n**Respuesta correcta: X)**\n\n*Explicación: ...*"
+      ? "Esta es una EVALUACIÓN. Genera 8-10 preguntas de opción múltiple sobre los temas de esta sección. Para cada pregunta incluye 4 opciones (A, B, C, D), indica claramente la respuesta correcta y una breve explicación."
       : lessonType === "feedback"
       ? "Esta es una sección de FEEDBACK. Haz un breve resumen de lo aprendido en esta sección, destaca los puntos clave y anima al estudiante a continuar."
       : "Esta es una lección teórica. Explica el tema de forma clara, completa y didáctica.";
@@ -100,10 +99,9 @@ INSTRUCCIONES CRÍTICAS:
       });
 
       if (!response.ok) {
-        const errorBody = await response.text().catch(() => "");
         throw new Error(
           response.status === 429
-            ? "Demasiadas solicitudes. Espera un momento e intenta de nuevo."
+            ? "Demasiadas solicitudes. Espera un momento."
             : response.status === 402
             ? "Créditos agotados. Contacta al administrador."
             : `Error al generar contenido (${response.status})`
@@ -117,8 +115,6 @@ INSTRUCCIONES CRÍTICAS:
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        // Check if this request is still current
         if (currentRequestId !== requestIdRef.current) return;
 
         const chunk = decoder.decode(value, { stream: true });
@@ -134,11 +130,10 @@ INSTRUCCIONES CRÍTICAS:
               fullContent += delta;
               setContent(fullContent);
             }
-          } catch { /* skip malformed chunk */ }
+          } catch { /* skip */ }
         }
       }
 
-      // Only cache and finalize if still the current request
       if (currentRequestId !== requestIdRef.current) return;
 
       try {
@@ -154,30 +149,24 @@ INSTRUCCIONES CRÍTICAS:
     }
   }, [moduleTitle, sectionTitle, lessonTitle, lessonType]);
 
-  // Re-fetch whenever the lesson changes
-  useEffect(() => {
-    // Reset state immediately when dependencies change
-    setContent("");
-    setLoading(true);
-    setError(null);
-    fetchContent();
-
-    return () => {
-      // Cleanup: abort on unmount or dependency change
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [fetchContent]);
-
   const regenerate = useCallback(() => {
-    // Clear cache for this lesson
     try {
       const cacheKey = getCacheKey(moduleTitle, sectionTitle, lessonTitle);
       localStorage.removeItem(cacheKey);
     } catch { /* ignore */ }
-    fetchContent(true);
-  }, [fetchContent, moduleTitle, sectionTitle, lessonTitle]);
+    generate(true);
+  }, [generate, moduleTitle, sectionTitle, lessonTitle]);
 
-  return { content, loading, error, regenerate };
+  // Reset generated state when lesson changes
+  const reset = useCallback(() => {
+    setContent("");
+    setLoading(false);
+    setError(null);
+    setGenerated(false);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, []);
+
+  return { content, loading, error, generated, generate, regenerate, reset };
 }
