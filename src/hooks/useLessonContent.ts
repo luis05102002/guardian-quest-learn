@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const CACHE_PREFIX = "lesson-content-";
 
-function getCacheKey(moduleTitle: string, lessonTitle: string) {
-  return CACHE_PREFIX + btoa(encodeURIComponent(`${moduleTitle}::${lessonTitle}`)).slice(0, 40);
+function getCacheKey(moduleTitle: string, sectionTitle: string, lessonTitle: string) {
+  const raw = `${moduleTitle}::${sectionTitle}::${lessonTitle}`;
+  // Use a longer, more unique key to avoid collisions
+  return CACHE_PREFIX + btoa(encodeURIComponent(raw)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 60);
 }
 
 export function useLessonContent(
@@ -19,7 +21,7 @@ export function useLessonContent(
   const fetchContent = useCallback(async (skipCache = false) => {
     if (!lessonTitle) return;
 
-    const cacheKey = getCacheKey(moduleTitle, lessonTitle);
+    const cacheKey = getCacheKey(moduleTitle, sectionTitle, lessonTitle);
 
     // Check cache first
     if (!skipCache) {
@@ -112,7 +114,7 @@ INSTRUCCIONES CRÍTICAS:
 
       // Cache the result
       try {
-        localStorage.setItem(getCacheKey(moduleTitle, lessonTitle), fullContent);
+        localStorage.setItem(getCacheKey(moduleTitle, sectionTitle, lessonTitle), fullContent);
       } catch { /* storage full, ignore */ }
 
       setLoading(false);
