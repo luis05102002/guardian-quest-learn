@@ -40,11 +40,12 @@ export default function AdminPage() {
     if (!isAdmin) return;
 
     const fetchAll = async () => {
-      const [profilesRes, progressRes, quizRes, bookingsRes] = await Promise.all([
+      const [profilesRes, progressRes, quizRes, bookingsRes, doubtsRes] = await Promise.all([
         supabase.from("profiles").select("id, full_name, avatar_url, created_at"),
         supabase.from("user_progress").select("user_id, lesson_key"),
         supabase.from("quiz_results").select("user_id, module_id, score, total"),
         supabase.from("tutoring_bookings").select("*").eq("status", "confirmed").order("created_at", { ascending: false }).limit(5),
+        supabase.from("student_doubts").select("*").order("created_at", { ascending: false }).limit(100),
       ]);
 
       const profiles = profilesRes.data || [];
