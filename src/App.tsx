@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import ModulePage from "./pages/ModulePage.tsx";
+import LessonPage from "./pages/LessonPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import CyberChatbot from "./components/CyberChatbot.tsx";
 
@@ -19,6 +20,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/modulo/:id" element={<ModulePage />} />
+          <Route path="/modulo/:moduleId/seccion/:sectionId/leccion/:lessonId" element={<LessonPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

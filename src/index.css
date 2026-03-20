@@ -103,6 +103,57 @@
   .module-gradient-4 { background: linear-gradient(135deg, hsl(38 50% 15%), hsl(38 60% 10%)); }
   .module-gradient-5 { background: linear-gradient(135deg, hsl(280 40% 15%), hsl(280 50% 10%)); }
   .module-gradient-6 { background: linear-gradient(135deg, hsl(190 50% 15%), hsl(190 60% 10%)); }
+
+
+  /* Prose styling for lesson content */
+  .prose-cyber {
+    @apply text-foreground leading-relaxed;
+  }
+  .prose-cyber h2 {
+    @apply text-xl font-bold text-foreground mt-8 mb-4;
+    line-height: 1.15;
+  }
+  .prose-cyber h3 {
+    @apply text-lg font-semibold text-foreground mt-6 mb-3;
+    line-height: 1.2;
+  }
+  .prose-cyber p {
+    @apply text-sm text-foreground/85 mb-4 leading-relaxed;
+  }
+  .prose-cyber ul, .prose-cyber ol {
+    @apply text-sm text-foreground/85 mb-4 pl-5 space-y-1.5;
+  }
+  .prose-cyber ul { @apply list-disc; }
+  .prose-cyber ol { @apply list-decimal; }
+  .prose-cyber li { @apply leading-relaxed; }
+  .prose-cyber strong { @apply text-foreground font-semibold; }
+  .prose-cyber code {
+    @apply font-mono-cyber text-xs bg-secondary px-1.5 py-0.5 rounded text-primary;
+  }
+  .prose-cyber pre {
+    @apply bg-secondary rounded-xl p-4 mb-4 overflow-x-auto;
+  }
+  .prose-cyber pre code {
+    @apply bg-transparent px-0 py-0 text-foreground/90;
+  }
+  .prose-cyber blockquote {
+    @apply border-l-2 border-primary/40 pl-4 italic text-muted-foreground my-4;
+  }
+  .prose-cyber hr {
+    @apply border-border/50 my-8;
+  }
+  .prose-cyber a {
+    @apply text-primary underline underline-offset-2 hover:text-primary/80;
+  }
+  .prose-cyber table {
+    @apply w-full text-sm mb-4 border-collapse;
+  }
+  .prose-cyber th {
+    @apply text-left p-2 border-b border-border font-semibold text-foreground;
+  }
+  .prose-cyber td {
+    @apply p-2 border-b border-border/50 text-foreground/85;
+  }
 }
 
 @keyframes fade-in-up {
