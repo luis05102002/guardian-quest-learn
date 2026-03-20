@@ -20,13 +20,13 @@ export default function ProjectSubmission({ moduleId, moduleTitle }: ProjectSubm
   const [saved, setSaved] = useState(false);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
-  const [existing, setExisting] = useState<{ github_url: string; description: string } | null>(null);
+  const [existing, setExisting] = useState<{ github_url: string; description: string; id?: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("project_submissions")
-      .select("github_url, description")
+      .select("id, github_url, description")
       .eq("user_id", user.id)
       .eq("module_id", moduleId)
       .maybeSingle()
