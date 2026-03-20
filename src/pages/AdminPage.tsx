@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { curriculum, getTotalLessons } from "@/data/curriculum";
-import { ArrowLeft, Users, BookOpen, Award, BarChart3, Loader2, User, Search, ChevronDown, ChevronUp, Github, Calendar, MessageSquare, TrendingUp } from "lucide-react";
+import { ArrowLeft, Users, BookOpen, Award, BarChart3, Loader2, User, Search, ChevronDown, ChevronUp, Github, Calendar, MessageSquare, TrendingUp, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
