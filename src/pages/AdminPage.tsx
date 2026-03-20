@@ -85,6 +85,34 @@ export default function AdminPage() {
 
       setStudents(studentList);
       setRecentBookings(bookingsRes.data || []);
+
+      // Process doubt patterns
+      const doubts = (doubtsRes.data || []) as any[];
+      const topicMap: Record<string, { count: number; students: Set<string> }> = {};
+      doubts.forEach((d: any) => {
+        if (!topicMap[d.topic]) topicMap[d.topic] = { count: 0, students: new Set() };
+        topicMap[d.topic].count++;
+        topicMap[d.topic].students.add(d.user_id);
+      });
+      const patterns = Object.entries(topicMap)
+        .map(([topic, data]) => ({
+          topic,
+          count: data.count,
+          students: Array.from(data.students).map(sid => profiles.find(p => p.id === sid)?.full_name || "Alumno"),
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8);
+      setDoubtPatterns(patterns);
+
+      // Recent doubts with student names
+      const recent = doubts.slice(0, 10).map((d: any) => ({
+        question: d.question,
+        student: profiles.find(p => p.id === d.user_id)?.full_name || "Alumno",
+        topic: d.topic,
+        created_at: d.created_at,
+      }));
+      setRecentDoubtsData(recent);
+
       setLoading(false);
     };
 
