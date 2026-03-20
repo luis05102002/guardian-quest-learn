@@ -33,6 +33,8 @@ export default function AdminPage() {
   const [studentModules, setStudentModules] = useState<Record<string, { moduleId: number; lessons: number; total: number; quizScore: number | null }[]>>({});
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [moduleChartData, setModuleChartData] = useState<{ name: string; completados: number }[]>([]);
+  const [doubtPatterns, setDoubtPatterns] = useState<{ topic: string; count: number; students: string[] }[]>([]);
+  const [recentDoubts, setRecentDoubtsData] = useState<{ question: string; student: string; topic: string; created_at: string }[]>([]);
 
   useEffect(() => {
     if (!isAdmin) return;
