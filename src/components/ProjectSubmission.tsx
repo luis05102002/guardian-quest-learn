@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Github, Loader2, CheckCircle2, ExternalLink, Edit3 } from "lucide-react";
+import ProjectFeedback from "./ProjectFeedback";
 
 interface ProjectSubmissionProps {
   moduleId: number;
