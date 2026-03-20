@@ -12,6 +12,7 @@ import { getTotalLessons } from "@/data/curriculum";
 export default function Index() {
   const { getModuleProgress, totalCompleted } = useProgress();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const totalLessons = getAllLessonsCount();
   const overallPercent = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
 
