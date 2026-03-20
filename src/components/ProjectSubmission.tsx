@@ -109,6 +109,7 @@ export default function ProjectSubmission({ moduleId, moduleTitle }: ProjectSubm
             <CheckCircle2 className="w-3 h-3" /> Guardado
           </p>
         )}
+        {existing.id && <ProjectFeedback submissionId={existing.id} isTeacher={isTeacher} />}
       </div>
     );
   }
