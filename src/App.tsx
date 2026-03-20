@@ -42,6 +42,9 @@ const AppRoutes = () => {
         <Route path="/auth" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/ranking" element={<ProtectedRoute><RankingPage /></ProtectedRoute>} />
+        <Route path="/certificados" element={<ProtectedRoute><CertificatesPage /></ProtectedRoute>} />
         <Route path="/modulo/:id" element={<ProtectedRoute><ModulePage /></ProtectedRoute>} />
         <Route path="/modulo/:moduleId/seccion/:sectionId/leccion/:lessonId" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
