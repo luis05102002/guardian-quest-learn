@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -133,6 +193,77 @@ export type Database = {
           score?: number
           total?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      tutoring_bookings: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          slot_id: string
+          status: string
+          student_id: string
+          whatsapp_phone: string | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          slot_id: string
+          status?: string
+          student_id: string
+          whatsapp_phone?: string | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          slot_id?: string
+          status?: string
+          student_id?: string
+          whatsapp_phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutoring_bookings_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "tutoring_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutoring_slots: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          is_available: boolean
+          slot_date: string
+          start_time: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          is_available?: boolean
+          slot_date: string
+          start_time: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_available?: boolean
+          slot_date?: string
+          start_time?: string
+          teacher_id?: string
         }
         Relationships: []
       }
