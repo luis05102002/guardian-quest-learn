@@ -21,7 +21,7 @@ export function useLessonContent(
   const fetchContent = useCallback(async (skipCache = false) => {
     if (!lessonTitle) return;
 
-    const cacheKey = getCacheKey(moduleTitle, lessonTitle);
+    const cacheKey = getCacheKey(moduleTitle, sectionTitle, lessonTitle);
 
     // Check cache first
     if (!skipCache) {
