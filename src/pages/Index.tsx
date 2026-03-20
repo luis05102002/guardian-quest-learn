@@ -44,6 +44,15 @@ export default function Index() {
 
             {user && (
               <div className="flex items-center gap-1">
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="p-2 rounded-lg hover:bg-secondary/50 text-[hsl(var(--cyber-amber))] hover:text-foreground transition-colors active:scale-95"
+                    title="Admin"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Link>
+                )}
                 <Link
                   to="/ranking"
                   className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
