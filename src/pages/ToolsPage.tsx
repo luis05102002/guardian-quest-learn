@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Key, Hash, Lock, Unlock, Eye, EyeOff, AlertTriangle, CheckCircle2, Copy, RefreshCw, Globe, Wifi, Server, ChevronRight } from "lucide-react";
+import { ArrowLeft, Shield, Key, Hash, Lock, Unlock, Eye, EyeOff, AlertTriangle, CheckCircle2, Copy, RefreshCw, Globe, Wifi, Server, ChevronRight, Mail, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 // ─── Password Strength Checker ───
