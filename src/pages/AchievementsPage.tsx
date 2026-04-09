@@ -121,7 +121,7 @@ export default function AchievementsPage() {
     let newUnlocks = 0;
     for (const ach of ACHIEVEMENTS) {
       if (!existing.has(ach.key) && ach.check(context)) {
-        const { error } = await supabase.from("achievements").insert({ user_id: user.id, achievement_key: ach.key });
+        const { error } = await supabase.rpc("unlock_achievement" as any, { _user_id: user.id, _achievement_key: ach.key });
         if (!error) {
           existing.add(ach.key);
           newUnlocks++;
