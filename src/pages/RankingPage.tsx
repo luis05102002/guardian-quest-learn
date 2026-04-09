@@ -28,7 +28,7 @@ export default function RankingPage() {
 
       const profiles = profilesRes.data || [];
       const progress = progressRes.data || [];
-      const quizzes = (quizRes.data || []) as Array<{ user_id: string; score: number; total: number }>;
+      const quizzes = (quizRes.data || []) as unknown as Array<{ user_id: string; score: number; total: number }>;
 
       const ranked: RankedStudent[] = profiles.map(p => {
         const lessons = progress.filter(pr => pr.user_id === p.id).length;
