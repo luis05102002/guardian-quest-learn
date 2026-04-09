@@ -7,7 +7,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ModuleCard from "@/components/ModuleCard";
 import ProgressBar from "@/components/ProgressBar";
 import NotificationBell from "@/components/NotificationBell";
-import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings, Calendar, MessageSquare, Wrench } from "lucide-react";
+import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings, Calendar, MessageSquare, Wrench, Star } from "lucide-react";
 
 export default function Index() {
   const { getModuleProgress, totalCompleted } = useProgress();
