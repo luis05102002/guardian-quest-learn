@@ -7,7 +7,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ModuleCard from "@/components/ModuleCard";
 import ProgressBar from "@/components/ProgressBar";
 import NotificationBell from "@/components/NotificationBell";
-import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings, Calendar, MessageSquare, Wrench } from "lucide-react";
+import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings, Calendar, MessageSquare, Wrench, Star } from "lucide-react";
 
 export default function Index() {
   const { getModuleProgress, totalCompleted } = useProgress();
@@ -74,6 +74,13 @@ export default function Index() {
                   title="Herramientas"
                 >
                   <Wrench className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/logros"
+                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                  title="Logros"
+                >
+                  <Star className="w-4 h-4" />
                 </Link>
                 <Link
                   to="/ranking"
