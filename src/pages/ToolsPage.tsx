@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Key, Hash, Lock, Unlock, Eye, EyeOff, AlertTriangle, CheckCircle2, Copy, RefreshCw, Globe, Wifi, Server, ChevronRight } from "lucide-react";
+import { ArrowLeft, Shield, Key, Hash, Lock, Unlock, Eye, EyeOff, AlertTriangle, CheckCircle2, Copy, RefreshCw, Globe, Wifi, Server, ChevronRight, Mail, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 // ─── Password Strength Checker ───
@@ -497,8 +497,226 @@ function SubnetCalculator() {
   );
 }
 
+// ─── Phishing Simulator ───
+interface PhishingEmail {
+  id: number;
+  from: string;
+  fromEmail: string;
+  subject: string;
+  body: string;
+  isPhishing: boolean;
+  clues: string[];
+}
+
+const PHISHING_EMAILS: PhishingEmail[] = [
+  {
+    id: 1, from: "Soporte Microsoft", fromEmail: "soporte@micr0soft-security.com",
+    subject: "⚠️ Su cuenta será suspendida en 24h",
+    body: "Estimado usuario,\n\nHemos detectado actividad sospechosa en su cuenta. Si no verifica su identidad en las próximas 24 horas, su cuenta será suspendida permanentemente.\n\nHaga clic aquí para verificar: http://micr0soft-verify.tk/login\n\nAtentamente,\nEquipo de Seguridad Microsoft",
+    isPhishing: true,
+    clues: ["Dominio falso (micr0soft con '0' en vez de 'o')", "Urgencia artificial (24h)", "Enlace sospechoso (.tk)", "Amenaza de suspensión para generar pánico"],
+  },
+  {
+    id: 2, from: "GitHub", fromEmail: "noreply@github.com",
+    subject: "You have a new security advisory",
+    body: "Hi there,\n\nA new security advisory has been published for a repository you watch: CVE-2025-1234.\n\nPlease review the advisory and update your dependencies accordingly.\n\nView advisory: https://github.com/advisories/GHSA-xxxx-yyyy-zzzz\n\nThanks,\nThe GitHub Team",
+    isPhishing: false,
+    clues: ["Dominio legítimo (github.com)", "No pide credenciales", "Enlace a dominio oficial", "Tono profesional sin urgencia extrema"],
+  },
+  {
+    id: 3, from: "Banco Santander", fromEmail: "alertas@santander-es.info",
+    subject: "Movimiento no autorizado detectado - Acción inmediata requerida",
+    body: "Estimado cliente,\n\nSe ha detectado un cargo de 2.499€ en su tarjeta terminada en ****4532. Si usted NO realizó esta transacción, confirme inmediatamente accediendo al siguiente enlace seguro:\n\nhttps://santander-es.info/confirmar-identidad\n\nSi no actúa en 2 horas, el cargo será procesado.\n\nBanco Santander - Departamento de Fraudes",
+    isPhishing: true,
+    clues: ["Dominio falso (santander-es.info no es santander.es)", "Urgencia extrema (2 horas)", "Pide verificar identidad por enlace", "Incluye datos parciales de tarjeta para parecer legítimo"],
+  },
+  {
+    id: 4, from: "Amazon", fromEmail: "order-update@amazon.es",
+    subject: "Tu pedido #402-3847562 ha sido enviado",
+    body: "Hola,\n\nTu pedido #402-3847562 ha sido enviado y llegará el jueves 15 de abril.\n\nPuedes seguir tu envío en: https://amazon.es/gp/your-account/order-details?orderID=402-3847562\n\nGracias por comprar en Amazon.",
+    isPhishing: false,
+    clues: ["Dominio legítimo (amazon.es)", "No solicita datos personales", "Enlace al dominio oficial", "Información específica del pedido"],
+  },
+  {
+    id: 5, from: "PayPal Security", fromEmail: "service@paypa1.com",
+    subject: "Your account has been limited",
+    body: "Dear Customer,\n\nWe've noticed unusual login activity on your PayPal account. Your account access has been limited until you verify your information.\n\nPlease download the attached form and fill in your credit card details and social security number to restore access.\n\nBest regards,\nPayPal Security Team",
+    isPhishing: true,
+    clues: ["Dominio falso (paypa1 con '1' en vez de 'l')", "Pide datos de tarjeta y SSN por formulario adjunto", "Ningún servicio legítimo pide estos datos por email", "Saludo genérico 'Dear Customer'"],
+  },
+  {
+    id: 6, from: "Google Workspace", fromEmail: "no-reply@google.com",
+    subject: "Nuevo inicio de sesión en tu cuenta",
+    body: "Hola,\n\nSe ha iniciado sesión en tu cuenta de Google desde un nuevo dispositivo:\n\n• Dispositivo: Chrome en Windows\n• Ubicación: Madrid, España\n• Hora: 14:32 (CET)\n\nSi fuiste tú, no necesitas hacer nada. Si no reconoces esta actividad, revisa la seguridad de tu cuenta en https://myaccount.google.com/security\n\nEquipo de seguridad de Google",
+    isPhishing: false,
+    clues: ["Dominio legítimo (google.com)", "Proporciona detalles específicos", "No exige acción urgente", "Enlace a dominio oficial de Google"],
+  },
+  {
+    id: 7, from: "DHL Express", fromEmail: "tracking@dhl-delivery-notice.com",
+    subject: "Paquete retenido en aduanas - Pago pendiente de 4.99€",
+    body: "Estimado destinatario,\n\nSu paquete (AWB: 7382910456) está retenido en aduanas por un saldo pendiente de 4.99€ en tasas aduaneras.\n\nRealice el pago en las próximas 48h para evitar la devolución del paquete al remitente:\nhttps://dhl-delivery-notice.com/pay?ref=7382910456\n\nDHL Express - Servicio de Aduanas",
+    isPhishing: true,
+    clues: ["Dominio falso (dhl-delivery-notice.com no es dhl.com)", "Solicita pago urgente de cantidad pequeña", "Plazo de 48h para presionar", "Técnica clásica de phishing por paquetería"],
+  },
+  {
+    id: 8, from: "LinkedIn", fromEmail: "messages-noreply@linkedin.com",
+    subject: "Tienes 3 nuevas invitaciones de conexión",
+    body: "Hola,\n\nTienes 3 nuevas invitaciones de conexión pendientes:\n\n• Ana García - Security Analyst en CrowdStrike\n• Carlos López - CISO en Telefónica\n• María Fernández - Pentester en Deloitte\n\nVer invitaciones: https://www.linkedin.com/mynetwork/invitation-manager/\n\nLinkedIn",
+    isPhishing: false,
+    clues: ["Dominio legítimo (linkedin.com)", "Contenido típico de notificaciones", "Enlace al dominio oficial", "No pide credenciales ni datos sensibles"],
+  },
+];
+
+function PhishingSimulator() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answered, setAnswered] = useState<Record<number, boolean | null>>({});
+  const [showResult, setShowResult] = useState(false);
+  const [finished, setFinished] = useState(false);
+
+  const email = PHISHING_EMAILS[currentIndex];
+  const totalEmails = PHISHING_EMAILS.length;
+  const answeredCount = Object.keys(answered).length;
+
+  const handleAnswer = (userSaysPhishing: boolean) => {
+    const correct = userSaysPhishing === email.isPhishing;
+    setAnswered(prev => ({ ...prev, [email.id]: correct }));
+    setShowResult(true);
+  };
+
+  const nextEmail = () => {
+    setShowResult(false);
+    if (currentIndex < totalEmails - 1) {
+      setCurrentIndex(prev => prev + 1);
+    } else {
+      setFinished(true);
+    }
+  };
+
+  const restart = () => {
+    setCurrentIndex(0);
+    setAnswered({});
+    setShowResult(false);
+    setFinished(false);
+  };
+
+  const correctCount = Object.values(answered).filter(Boolean).length;
+  const scorePercent = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+
+  if (finished) {
+    const grade = scorePercent >= 90 ? "Experto" : scorePercent >= 70 ? "Bueno" : scorePercent >= 50 ? "Necesita práctica" : "Vulnerable";
+    const gradeColor = scorePercent >= 90 ? "text-primary" : scorePercent >= 70 ? "text-[hsl(45,90%,55%)]" : scorePercent >= 50 ? "text-[hsl(var(--cyber-amber))]" : "text-destructive";
+    return (
+      <div className="space-y-6 text-center">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-foreground">Simulación Completada</h2>
+          <p className="text-muted-foreground">Has analizado {totalEmails} correos electrónicos</p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-8 space-y-4">
+          <div className={`text-5xl font-bold font-mono-cyber ${gradeColor}`}>{scorePercent}%</div>
+          <p className={`text-lg font-semibold ${gradeColor}`}>{grade}</p>
+          <p className="text-sm text-muted-foreground">{correctCount} de {answeredCount} correctas</p>
+          <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
+            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${scorePercent}%` }} />
+          </div>
+        </div>
+        <div className="space-y-2 text-left">
+          <h3 className="text-sm font-semibold text-foreground">Resumen por email:</h3>
+          {PHISHING_EMAILS.map(e => (
+            <div key={e.id} className={`flex items-center gap-3 p-3 rounded-lg border ${answered[e.id] ? "border-primary/30 bg-primary/5" : "border-destructive/30 bg-destructive/5"}`}>
+              {answered[e.id] ? <CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> : <XCircle className="w-4 h-4 text-destructive shrink-0" />}
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-foreground truncate">{e.subject}</p>
+                <p className="text-[10px] text-muted-foreground">{e.isPhishing ? "Era phishing" : "Era legítimo"}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button onClick={restart} className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors active:scale-[0.98]">
+          Repetir simulación
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground font-mono-cyber">Email {currentIndex + 1} de {totalEmails}</span>
+        <span className="text-xs text-muted-foreground">{correctCount}/{answeredCount} correctas</span>
+      </div>
+      <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${((currentIndex + (showResult ? 1 : 0)) / totalEmails) * 100}%` }} />
+      </div>
+
+      {/* Email card */}
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="border-b border-border bg-muted/30 p-4 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Mail className="w-4 h-4 text-primary" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-foreground">{email.from}</p>
+              <p className="text-[11px] text-muted-foreground font-mono-cyber truncate">&lt;{email.fromEmail}&gt;</p>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-foreground">{email.subject}</p>
+        </div>
+        <div className="p-4">
+          <pre className="text-xs text-foreground/90 whitespace-pre-wrap font-sans leading-relaxed">{email.body}</pre>
+        </div>
+      </div>
+
+      {!showResult ? (
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => handleAnswer(true)}
+            className="py-3 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive font-medium text-sm hover:bg-destructive/20 transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            Es Phishing
+          </button>
+          <button
+            onClick={() => handleAnswer(false)}
+            className="py-3 rounded-lg border border-primary/50 bg-primary/10 text-primary font-medium text-sm hover:bg-primary/20 transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            Es Legítimo
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className={`rounded-lg p-4 border ${answered[email.id] ? "border-primary/40 bg-primary/10" : "border-destructive/40 bg-destructive/10"}`}>
+            <div className="flex items-center gap-2 mb-2">
+              {answered[email.id] ? <CheckCircle2 className="w-5 h-5 text-primary" /> : <XCircle className="w-5 h-5 text-destructive" />}
+              <span className={`font-semibold text-sm ${answered[email.id] ? "text-primary" : "text-destructive"}`}>
+                {answered[email.id] ? "¡Correcto!" : "Incorrecto"}
+              </span>
+            </div>
+            <p className="text-xs text-foreground/80 mb-2">
+              Este email {email.isPhishing ? "SÍ era phishing" : "era LEGÍTIMO"}.
+            </p>
+            <div className="space-y-1">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Pistas clave:</p>
+              {email.clues.map((clue, i) => (
+                <p key={i} className="text-xs text-foreground/70 flex items-start gap-1.5">
+                  <span className="text-primary mt-0.5">•</span> {clue}
+                </p>
+              ))}
+            </div>
+          </div>
+          <button onClick={nextEmail} className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors active:scale-[0.98]">
+            {currentIndex < totalEmails - 1 ? "Siguiente email →" : "Ver resultados"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Page ───
 const tools = [
+  { id: "phishing", title: "Simulador de Phishing", icon: Mail, desc: "Identifica emails falsos vs legítimos", component: PhishingSimulator },
   { id: "password-check", title: "Analizador de Contraseñas", icon: Key, desc: "Evalúa la fortaleza y tiempo de crackeo", component: PasswordChecker },
   { id: "password-gen", title: "Generador de Contraseñas", icon: Shield, desc: "Genera contraseñas seguras y aleatorias", component: PasswordGenerator },
   { id: "hash", title: "Generador de Hashes", icon: Hash, desc: "SHA-1, SHA-256, SHA-384, SHA-512", component: HashGenerator },
