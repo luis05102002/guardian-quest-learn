@@ -76,6 +76,13 @@ export default function Index() {
                   <Wrench className="w-4 h-4" />
                 </Link>
                 <Link
+                  to="/logros"
+                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                  title="Logros"
+                >
+                  <Star className="w-4 h-4" />
+                </Link>
+                <Link
                   to="/ranking"
                   className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
                   title="Ranking"
