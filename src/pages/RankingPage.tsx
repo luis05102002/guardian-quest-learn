@@ -23,7 +23,7 @@ export default function RankingPage() {
       const [profilesRes, progressRes, quizRes] = await Promise.all([
         supabase.from("profiles").select("id, full_name, avatar_url"),
         supabase.from("user_progress").select("user_id, id"),
-        supabase.from("quiz_results").select("user_id, score, total"),
+        supabase.from("quiz_scores" as any).select("user_id, score, total"),
       ]);
 
       const profiles = profilesRes.data || [];
