@@ -32,18 +32,21 @@ export default function LegalPage() {
 
   useEffect(() => {
     async function fetchDocs() {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("legal_documents")
         .select("*")
         .eq("is_active", true)
         .order("title");
-      if (data) {
-        setDocs(data as LegalDoc[]);
-        const targetSlug = slug || data[0]?.slug;
-        const found = (data as LegalDoc[]).find(d => d.slug === targetSlug);
-        if (found) setActiveDoc(found);
-        else if (data.length > 0) setActiveDoc(data[0] as LegalDoc);
+      if (error || !data) {
+        setDocs([]);
+        setLoading(false);
+        return;
       }
+      setDocs(data as LegalDoc[]);
+      const targetSlug = slug || data[0]?.slug;
+      const found = (data as LegalDoc[]).find(d => d.slug === targetSlug);
+      if (found) setActiveDoc(found);
+      else if (data.length > 0) setActiveDoc(data[0] as LegalDoc);
       setLoading(false);
     }
     fetchDocs();

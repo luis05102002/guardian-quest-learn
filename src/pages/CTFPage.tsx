@@ -51,8 +51,8 @@ export default function CTFPage() {
 
   async function fetchData() {
     const [chRes, subRes] = await Promise.all([
-      supabase.from("ctf_challenges").select("*").eq("is_active", true).order("points", { ascending: true }),
-      supabase.from("ctf_submissions").select("challenge_id").eq("user_id", user?.id || "").eq("is_correct", true),
+      supabase.from("ctf_challenges").select("*").eq("is_active", true).order("points", { ascending: true }).then(r => r.error ? { data: null as any } : r),
+      supabase.from("ctf_submissions").select("challenge_id").eq("user_id", user?.id || "").eq("is_correct", true).then(r => r.error ? { data: null as any } : r),
     ]);
     setChallenges((chRes.data as Challenge[]) || []);
     setSolved(new Set((subRes.data as SolvedChallenge[])?.map(s => s.challenge_id) || []));
@@ -180,8 +180,7 @@ export default function CTFPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-xs font-mono-cyber px-2 py-0.5 rounded border {DIFFICULTY_COLORS[ch.difficulty]}"
-                        className={`text-xs font-mono-cyber px-2 py-0.5 rounded border ${DIFFICULTY_COLORS[ch.difficulty] || ''}`}>
+                      <span className={`text-xs font-mono-cyber px-2 py-0.5 rounded border ${DIFFICULTY_COLORS[ch.difficulty] || ''}`}>
                         {ch.difficulty === 'easy' ? '🟢 Fácil' : ch.difficulty === 'medium' ? '🟡 Medio' : '🔴 Difícil'}
                       </span>
                       <span className="text-xs font-mono-cyber text-muted-foreground">{CATEGORY_LABELS[ch.category] || ch.category}</span>

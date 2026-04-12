@@ -26,12 +26,16 @@ export default function RankingPage() {
   }, []);
 
   async function fetchRanking() {
-    const [profilesRes, progressRes, quizRes, labRes, ctfRes] = await Promise.all([
+    const [profilesRes, progressRes, quizRes] = await Promise.all([
       supabase.from("profiles").select("id, full_name, avatar_url"),
       supabase.from("user_progress").select("user_id, id"),
       supabase.from("quiz_results" as any).select("user_id, score, total"),
-      supabase.from("lab_completions").select("user_id, score, lab_key"),
-      supabase.from("ctf_submissions").select("user_id, challenge_id, is_correct").eq("is_correct", true),
+    ]);
+
+    // Fetch optional tables (may not exist yet)
+    const [labRes, ctfRes] = await Promise.all([
+      supabase.from("lab_completions").select("user_id, score, lab_key").then(r => r.error ? { data: null as any } : r),
+      supabase.from("ctf_submissions").select("user_id, challenge_id, is_correct").eq("is_correct", true).then(r => r.error ? { data: null as any } : r),
     ]);
 
     const profiles = profilesRes.data || [];
@@ -40,8 +44,8 @@ export default function RankingPage() {
     const labs = (labRes.data || []) as unknown as Array<{ user_id: string; score: number; lab_key: string }>;
     const ctfSolved = (ctfRes.data || []) as unknown as Array<{ user_id: string; challenge_id: string }>;
 
-    // Get challenge points for CTF scoring
-    const { data: challenges } = await supabase.from("ctf_challenges").select("id, points");
+    // Get challenge points for CTF scoring (optional)
+    const { data: challenges } = await supabase.from("ctf_challenges").select("id, points").then(r => r.error ? { data: null } : r);
     const challengePoints = new Map((challenges || []).map((c: any) => [c.id, c.points]));
 
     const ranked: RankedStudent[] = profiles.map(p => {
