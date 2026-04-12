@@ -1,10 +1,22 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
+const ALLOWED_ORIGINS = [
+  "https://id-preview-f5ec46dc--e1fc3a92-0fb8-40fd-acdd-c06ccf5f79cc.lovable.app",
+  "https://guardian-quest-learn.lovable.app",
+  "http://localhost:8080",
+  "http://localhost:5173",
+];
+
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+function getCorsHeaders(origin: string | null) {
+  const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[1];
+  return { ...corsHeaders, "Access-Control-Allow-Origin": allowOrigin };
+}
 
 const SYSTEM_PROMPT = `Eres CyberMentor, un asistente experto en ciberseguridad Y secretario académico inteligente de CyberAcademy. Tienes dos roles principales:
 
@@ -47,7 +59,10 @@ Cuando el alumno pida ciertas cosas, responde con etiquetas especiales que el fr
 - Si recibes contexto del alumno (progreso, módulo actual), úsalo para personalizar respuestas`;
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const origin = req.headers.get("origin");
+  const headers = getCorsHeaders(origin);
+
+  if (req.method === "OPTIONS") return new Response(null, { headers });
 
   try {
     const { messages, action, userId, studentContext } = await req.json();
@@ -111,7 +126,7 @@ serve(async (req) => {
       }
 
       return new Response(JSON.stringify({ saved: true, topicCounts }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...headers, "Content-Type": "application/json" },
       });
     }
 
@@ -147,31 +162,31 @@ serve(async (req) => {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Demasiadas solicitudes. Espera un momento." }), {
           status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...headers, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: "Créditos agotados. Contacta al administrador." }), {
           status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...headers, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
       return new Response(JSON.stringify({ error: "Error del servicio de IA" }), {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...headers, "Content-Type": "application/json" },
       });
     }
 
     return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      headers: { ...headers, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
     console.error("chat error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Error desconocido" }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...headers, "Content-Type": "application/json" },
     });
   }
 });

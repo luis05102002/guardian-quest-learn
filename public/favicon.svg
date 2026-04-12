@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a73e8"/>
+      <stop offset="100%" style="stop-color:#0d47a1"/>
+    </linearGradient>
+    <linearGradient id="lockGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4fc3f7"/>
+      <stop offset="100%" style="stop-color:#29b6f6"/>
+    </linearGradient>
+  </defs>
+  <path d="M256 32 L464 112 L464 272 C464 380 368 460 256 480 C144 460 48 380 48 272 L48 112 Z" fill="url(#shieldGrad)" />
+  <path d="M256 52 L444 124 L444 268 C444 366 358 440 256 458 C154 440 68 366 68 268 L68 124 Z" fill="#0a3d8f" opacity="0.4"/>
+  <rect x="224" y="200" width="64" height="80" rx="8" fill="url(#lockGrad)"/>
+  <path d="M208 200 L208 168 C208 140 228 116 256 116 C284 116 304 140 304 168 L304 200" fill="none" stroke="#4fc3f7" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="256" cy="244" r="10" fill="#0d47a1"/>
+  <rect x="252" y="244" width="8" height="20" rx="4" fill="#0d47a1"/>
+  <path d="M192 312 L320 312 L320 376 C320 408 292 432 256 432 C220 432 192 408 192 376 Z" fill="none" stroke="#4fc3f7" stroke-width="6" opacity="0.5"/>
+  <path d="M256 108 L256 52" stroke="#4fc3f7" stroke-width="3" opacity="0.6"/>
+  <circle cx="256" cy="108" r="6" fill="#4fc3f7" opacity="0.8"/>
+  <circle cx="148" cy="166" r="4" fill="#4fc3f7" opacity="0.4"/>
+  <circle cx="364" cy="166" r="4" fill="#4fc3f7" opacity="0.4"/>
+  <circle cx="120" cy="256" r="3" fill="#4fc3f7" opacity="0.3"/>
+  <circle cx="392" cy="256" r="3" fill="#4fc3f7" opacity="0.3"/>
+</svg>

@@ -7,7 +7,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ModuleCard from "@/components/ModuleCard";
 import ProgressBar from "@/components/ProgressBar";
 import NotificationBell from "@/components/NotificationBell";
-import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings, Calendar, MessageSquare, Wrench, Star } from "lucide-react";
+import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings, Calendar, MessageSquare, Wrench, Star, Flag, Scale } from "lucide-react";
 
 export default function Index() {
   const { getModuleProgress, totalCompleted } = useProgress();
@@ -81,6 +81,13 @@ export default function Index() {
                   title="Logros"
                 >
                   <Star className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/ctf"
+                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                  title="CTF"
+                >
+                  <Flag className="w-4 h-4" />
                 </Link>
                 <Link
                   to="/ranking"
@@ -171,6 +178,18 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* Legal footer */}
+      <footer className="border-t border-border/50 py-8 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+          <Link to="/legal/aviso-legal" className="hover:text-foreground transition-colors flex items-center gap-1">
+            <Scale className="w-3 h-3" /> Aviso Legal
+          </Link>
+          <Link to="/legal/privacidad" className="hover:text-foreground transition-colors">Privacidad</Link>
+          <Link to="/legal/cookies" className="hover:text-foreground transition-colors">Cookies</Link>
+          <span>© {new Date().getFullYear()} CyberAcademy</span>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -35,6 +35,137 @@ export type Database = {
         }
         Relationships: []
       }
+      ctf_challenges: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          category: string
+          difficulty: string
+          points: number
+          flag: string
+          hint: string
+          module_id: number | null
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description: string
+          category: string
+          difficulty: string
+          points: number
+          flag: string
+          hint?: string
+          module_id?: number | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          category?: string
+          difficulty?: string
+          points?: number
+          flag?: string
+          hint?: string
+          module_id?: number | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      ctf_submissions: {
+        Row: {
+          id: string
+          user_id: string
+          challenge_id: string
+          submitted_flag: string
+          is_correct: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          challenge_id: string
+          submitted_flag: string
+          is_correct?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          challenge_id?: string
+          submitted_flag?: string
+          is_correct?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ctf_submissions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "ctf_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lab_completions: {
+        Row: {
+          id: string
+          user_id: string
+          lab_key: string
+          score: number
+          completed_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          lab_key: string
+          score?: number
+          completed_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          lab_key?: string
+          score?: number
+          completed_at?: string
+        }
+        Relationships: []
+      }
+      legal_documents: {
+        Row: {
+          id: string
+          slug: string
+          title: string
+          content: string
+          version: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          title: string
+          content: string
+          version?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          title?: string
+          content?: string
+          version?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string
