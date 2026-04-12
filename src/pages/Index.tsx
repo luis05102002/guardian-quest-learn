@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { curriculum, getAllLessonsCount, getTotalLessons } from "@/data/curriculum";
 import { useProgress } from "@/hooks/useProgress";
@@ -7,7 +7,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ModuleCard from "@/components/ModuleCard";
 import ProgressBar from "@/components/ProgressBar";
 import NotificationBell from "@/components/NotificationBell";
-import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings, Calendar, MessageSquare, Wrench, Star, Flag, Scale } from "lucide-react";
+import { Shield, ChevronRight, LogOut, User, Trophy, Award, Settings, Calendar, MessageSquare, Wrench, Star, Flag, Scale, Menu, X } from "lucide-react";
 
 export default function Index() {
   const { getModuleProgress, totalCompleted } = useProgress();
@@ -15,101 +15,76 @@ export default function Index() {
   const { isAdmin } = useIsAdmin();
   const totalLessons = getAllLessonsCount();
   const overallPercent = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const [visible, setVisible] = useState(false);
   useEffect(() => { setVisible(true); }, []);
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuOpen && menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
+
+  const navLinks = user ? [
+    { to: "/ranking", icon: Trophy, label: "Ranking" },
+    { to: "/ctf", icon: Flag, label: "CTF" },
+    { to: "/logros", icon: Star, label: "Logros" },
+    { to: "/certificados", icon: Award, label: "Certificados" },
+    { to: "/tutorias", icon: Calendar, label: "Tutorías" },
+    { to: "/chat", icon: MessageSquare, label: "Chat" },
+    { to: "/herramientas", icon: Wrench, label: "Herramientas" },
+    ...(isAdmin ? [{ to: "/admin", icon: Settings, label: "Admin" }] : []),
+    { to: "/perfil", icon: User, label: "Perfil" },
+  ] : [];
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/50 sticky top-0 z-50 bg-background/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
               <Shield className="w-4 h-4 text-primary" />
             </div>
-            <span className="font-semibold text-foreground tracking-tight">CyberAcademy</span>
-          </div>
+            <span className="font-semibold text-foreground tracking-tight text-sm sm:text-base">CyberAcademy</span>
+          </Link>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-3">
+          {/* Progress - desktop only */}
+          {user && (
+            <div className="hidden md:flex items-center gap-2 ml-4">
               <span className="text-xs text-muted-foreground font-mono-cyber tabular-nums">
                 {totalCompleted}/{totalLessons}
               </span>
-              <div className="w-24">
+              <div className="w-20">
                 <ProgressBar percent={overallPercent} size="sm" />
               </div>
               <span className="font-mono-cyber text-xs text-primary tabular-nums">{overallPercent}%</span>
             </div>
+          )}
 
-            {user && (
-              <div className="flex items-center gap-1">
-                <NotificationBell />
-                {isAdmin && (
+          {user && (
+            <div className="flex items-center gap-1 ml-auto">
+              <NotificationBell />
+              
+              {/* Desktop nav */}
+              <nav className="hidden lg:flex items-center gap-0.5">
+                {navLinks.map(link => (
                   <Link
-                    to="/admin"
-                    className="p-2 rounded-lg hover:bg-secondary/50 text-[hsl(var(--cyber-amber))] hover:text-foreground transition-colors active:scale-95"
-                    title="Admin"
+                    key={link.to}
+                    to={link.to}
+                    className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                    title={link.label}
                   >
-                    <Settings className="w-4 h-4" />
+                    <link.icon className="w-4 h-4" />
                   </Link>
-                )}
-                <Link
-                  to="/tutorias"
-                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-                  title="Tutorías"
-                >
-                  <Calendar className="w-4 h-4" />
-                </Link>
-                <Link
-                  to="/chat"
-                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-                  title="Mensajes"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                </Link>
-                <Link
-                  to="/herramientas"
-                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-                  title="Herramientas"
-                >
-                  <Wrench className="w-4 h-4" />
-                </Link>
-                <Link
-                  to="/logros"
-                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-                  title="Logros"
-                >
-                  <Star className="w-4 h-4" />
-                </Link>
-                <Link
-                  to="/ctf"
-                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-                  title="CTF"
-                >
-                  <Flag className="w-4 h-4" />
-                </Link>
-                <Link
-                  to="/ranking"
-                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-                  title="Ranking"
-                >
-                  <Trophy className="w-4 h-4" />
-                </Link>
-                <Link
-                  to="/certificados"
-                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-                  title="Certificados"
-                >
-                  <Award className="w-4 h-4" />
-                </Link>
-                <Link
-                  to="/perfil"
-                  className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-                  title="Mi perfil"
-                >
-                  <User className="w-4 h-4" />
-                </Link>
+                ))}
                 <button
                   onClick={signOut}
                   className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
@@ -117,10 +92,59 @@ export default function Index() {
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
-              </div>
-            )}
-          </div>
+              </nav>
+
+              {/* Mobile menu button */}
+              <button
+                className="lg:hidden p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground"
+                onClick={() => setMenuOpen(!menuOpen)}
+                title="Menú"
+              >
+                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+          )}
+
+          {!user && (
+            <Link to="/auth" className="ml-auto px-4 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+              Iniciar sesión
+            </Link>
+          )}
         </div>
+
+        {/* Mobile dropdown menu */}
+        {menuOpen && user && (
+          <div ref={menuRef} className="lg:hidden border-t border-border/50 bg-background/95 backdrop-blur-md">
+            <div className="max-w-6xl mx-auto px-4 py-2 grid grid-cols-4 gap-1">
+              {navLinks.map(link => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <link.icon className="w-5 h-5" />
+                  <span className="text-[10px]">{link.label}</span>
+                </Link>
+              ))}
+              <button
+                onClick={() => { setMenuOpen(false); signOut(); }}
+                className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="text-[10px]">Salir</span>
+              </button>
+            </div>
+            {/* Mobile progress */}
+            <div className="max-w-6xl mx-auto px-4 pb-2 flex items-center gap-2">
+              <span className="text-xs text-muted-foreground font-mono-cyber tabular-nums">{totalCompleted}/{totalLessons}</span>
+              <div className="flex-1">
+                <ProgressBar percent={overallPercent} size="sm" />
+              </div>
+              <span className="font-mono-cyber text-xs text-primary tabular-nums">{overallPercent}%</span>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero */}
