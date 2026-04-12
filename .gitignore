@@ -12,10 +12,10 @@ dist
 dist-ssr
 *.local
 
-# Environment variables (contains secrets)
-.env
-.env.*
-!.env.example
+# Environment variables (secrets only — VITE_ vars are public and needed for build)
+.env.local
+.env.production
+.env.*.local
 
 # Editor directories and files
 .vscode/*
